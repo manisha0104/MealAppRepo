@@ -1,118 +1,114 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { Provider } from 'react-redux';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import CategoryScreen from './Screens/CategoryScreen';
+import CategoryMeals from './Screens/CategoryMeals';
+import MealDetails from './Screens/MealDetails';
+import FilterScreen from './Screens/FilterScreen';
+import Favourites from './Screens/Favourites';
+import { StyleSheet } from 'react-native';
+import Colors from './Constaints/Colors';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+import MealsReducer from './Store/reducers/Meals';
 
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const rootReducer = combineReducers({
+  meals: MealsReducer,
+  // Add other reducers here
+  // other: otherReducer,
+});
+const store = configureStore({
+  reducer: rootReducer,
+});
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+const Drawer = createDrawerNavigator();
+
+
+
+function CategoryStack() {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <Stack.Navigator>
+      <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
+      <Stack.Screen name="CategoryMeals" component={CategoryMeals} />
+      <Stack.Screen name="MealDetails" component={MealDetails} />
+    </Stack.Navigator>
+  );
+}
+function favDrawer() {
+  return (
+    <Drawer.Navigator 
+      screenOptions={{
+        headerShown: false
+      }}>
+      <Drawer.Screen name="Favourites" component={Favourites} />
+      <Drawer.Screen name="Categories" component={CategoryStack} />
+      <Drawer.Screen name="FilterScreen" component={FilterScreen} />
+    </Drawer.Navigator>
+  );
+}
+function MyDrawer() {
+  return (
+    <Drawer.Navigator 
+      screenOptions={{
+        headerShown: false
+      }}>
+      <Drawer.Screen name="Categories" component={CategoryStack} />
+      <Drawer.Screen name="Filters" component={FilterScreen} />
+    </Drawer.Navigator>
   );
 }
 
-function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
 
+function HomeTabs() {
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarIcon: () => null, // Hide icons for tabs
+        tabBarActiveTintColor: 'white', // Color of the active tab label
+        tabBarInactiveTintColor: 'black', // Color of the inactive tab label
+        tabBarLabelStyle: styles.label, // Style for the tab label
+        tabBarStyle: styles.tabBar, // Style for the tab bar
+      }}
+    >
+      <Tab.Screen name="Categories" component={MyDrawer} />
+      <Tab.Screen name="Favourites" component={favDrawer} />
+    </Tab.Navigator>
+  );
+}
+
+export default function MealsNavigator() {
+  return (
+    <Provider store={store}>
+    <NavigationContainer>
+      <HomeTabs />
+    </NavigationContainer>
+    </Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  tabBar: {
+    backgroundColor: Colors.accentColor, // Background color of the tab bar
+    paddingBottom: 10,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  label: {
+    fontSize: 20, // Font size of the tab label
+    fontWeight: 'bold', // Font weight of the tab label
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  drawer: {
+    backgroundColor: Colors.primaryColor, // Background color of the drawer
   },
-  highlight: {
-    fontWeight: '700',
+  drawerLabel: {
+    fontSize: 18, // Font size of the drawer label
   },
 });
-
-export default App;
